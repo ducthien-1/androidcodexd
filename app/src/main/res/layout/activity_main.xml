@@ -20,7 +20,7 @@
             android:src="@android:drawable/ic_menu_revert"
             android:background="?android:attr/actionBarItemBackground"
             android:contentDescription="Back"
-            android:onClick="onBackPressed"
+            android:onClick="goBackToCategories"
             android:id="@+id/backBtn"/>
 
         <androidx.appcompat.widget.SearchView

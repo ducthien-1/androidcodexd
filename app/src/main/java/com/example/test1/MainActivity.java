@@ -115,10 +115,9 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, "Cart button not found in activity_main.xml");
         }
 
-        ImageButton backBtn = findViewById(R.id.backBtn);
+        backBtn = findViewById(R.id.backBtn);
         backBtn.setOnClickListener(v -> {
-            Log.d(TAG, "Back button clicked, navigating back");
-            onBackPressed(); // Call the default back press behavior
+            goBackToCategories(v); // Use the new method for back navigation
         });
 
     }
@@ -163,5 +162,13 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         updateCartCount();
         Log.d(TAG, "MainActivity resumed, cart count updated");
+    }
+    public void goBackToCategories(View view) {
+        Log.d(TAG, "Back button clicked, navigating back to CategoriesActivity");
+        Intent intent = new Intent(this, CategoriesActivity.class);
+        // Optionally pass the category ID if filtering is needed (e.g., from the product)
+        // For simplicity, we can navigate without filtering unless a specific category is tracked
+        startActivity(intent);
+        finish(); // Close MainActivity to prevent back stack issues
     }
 }
