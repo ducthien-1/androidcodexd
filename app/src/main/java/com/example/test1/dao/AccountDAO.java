@@ -13,7 +13,7 @@ public class AccountDAO {
     private static final String COLUMN_ACCOUNT_ID = "accountId";
     private static final String COLUMN_USERNAME = "username";
     private static final String COLUMN_PASSWORD = "password";
-    private static final String COLUMN_PHONENUMBER ="phonenumber";
+    private static final String COLUMN_PHONENUMBER ="phoneNumber";
     private static final String COLUMN_EMAIL = "email";
     private static final String COLUMN_ADDRESS = "address";
     private static final String COLUMN_ROLE_ID = "roleId";
@@ -42,17 +42,20 @@ public class AccountDAO {
     }
     // Login Method
     public Account login(String username, String password) {
+        String table = TABLE_NAME;
         String[] columns = {COLUMN_ACCOUNT_ID, COLUMN_USERNAME, COLUMN_PASSWORD, COLUMN_PHONENUMBER, COLUMN_EMAIL, COLUMN_ADDRESS, COLUMN_ROLE_ID};
         String selection = "username = ? AND password = ?";
         String[] selectionArgs = {username, password};
-        Cursor cursor = db.query(TABLE_NAME, columns, selection, selectionArgs, null, null, null);
+        Cursor cursor = db.query(table, columns, selection, selectionArgs, null, null, null);
         if (cursor != null && cursor.moveToFirst()) {
             Account account = cursorToAccount(cursor);
             cursor.close();
             return account;
-        } else {
-            return null; // Account not found
         }
+        if(cursor != null) {
+            cursor.close();
+        }
+        return null;
     }
     //Register Method
     public long register(String username, String password, String phoneNumber, String email, String address, int roleId) {
