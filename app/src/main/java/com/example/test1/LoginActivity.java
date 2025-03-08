@@ -1,6 +1,7 @@
 package com.example.test1;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
@@ -27,6 +28,10 @@ public class LoginActivity extends AppCompatActivity {
     private TextView tv_register_link;
     private ImageView tv_password_visibility;
     private AccountDAO accountDAO;
+    private SharedPreferences sharedPreferences;
+    private static final String PREF_NAME = "MyPrefs";
+    private static final String KEY_ACCOUNT_ID = "accountId";
+
     private boolean isPasswordVisible = false;
 
     @Override
@@ -83,6 +88,13 @@ public class LoginActivity extends AppCompatActivity {
                             Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                             startActivity(intent);
                             finish();
+
+                            // Save the account id in SharedPreferences
+                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                            editor.putInt(KEY_ACCOUNT_ID, account.getAccountId());
+                            editor.apply();
+
+
                         }
                         else {
                             Toast.makeText(this, "Login failed. Password or username is incorrect", Toast.LENGTH_SHORT).show();
