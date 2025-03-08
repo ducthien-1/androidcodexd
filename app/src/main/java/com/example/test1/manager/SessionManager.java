@@ -29,7 +29,7 @@ public class SessionManager {
     }
     // Check if user is logged in
     public boolean isLoggedIn() {
-        return sharedPreferences.getInt(KEY_ACCOUNT_ID, -1) != -1;;
+        return sharedPreferences.getInt(KEY_ACCOUNT_ID, -1) != -1;
     }
     // Logout Method to clear session
     public void logout() {
