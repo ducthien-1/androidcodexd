@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -13,6 +14,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.test1.R;
+import com.example.test1.ShoppingCartActivity;
 
 public class SelectManagementActivity extends AppCompatActivity {
 
@@ -26,18 +28,16 @@ public class SelectManagementActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        androidx.appcompat.widget.Toolbar toolbar = findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
         // Set up button click listeners
-        Button btnProductManagement = findViewById(R.id.btn_product_management);
-        Button btnUserManagement = findViewById(R.id.btn_user_management);
+        LinearLayout layoutUserManagement = findViewById(R.id.layoutUserManagement);
+        LinearLayout layoutProductManagement = findViewById(R.id.layoutProductManagement);
 
-        btnProductManagement.setOnClickListener(v -> {
+        layoutProductManagement.setOnClickListener(v -> {
             startActivity(new Intent(this, ProductManagementActivity.class));
         });
 
-        btnUserManagement.setOnClickListener(v -> {
+        layoutUserManagement.setOnClickListener(v -> {
             startActivity(new Intent(this, UserManagementActivity.class));
         });
     }
@@ -54,15 +54,21 @@ public class SelectManagementActivity extends AppCompatActivity {
         int itemId = item.getItemId();
         if (itemId == R.id.menu_user_profile) {// Handle Edit User Profile click
             System.out.println("Edit User Profile clicked");
+//            Intent intent = new Intent(this, ViewUserProfileActivity.class);
+//            startActivity(intent);
             return true;
-        } else if (itemId == R.id.menu_services) {// Handle Services click
-            System.out.println("Services clicked");
+        } else if (itemId == R.id.menu_cart) {// Handle Services click
+            System.out.println("Cart clicked");
+            Intent intent = new Intent(this, ShoppingCartActivity.class);
+            startActivity(intent);
             return true;
         } else if (itemId == R.id.menu_setting) {// Handle Setting click
             System.out.println("Setting clicked");
             return true;
         } else if (itemId == R.id.menu_management) {// Handle Management click
             System.out.println("Management clicked");
+            Intent intent = new Intent(this, SelectManagementActivity.class);
+            startActivity(intent);
             return true;
         } else if (itemId == R.id.menu_req_gps) {// Handle Request GPS click
             System.out.println("Request GPS clicked");

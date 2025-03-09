@@ -4,13 +4,13 @@
 
     <item
         android:id="@+id/menu_user_profile"
-        android:title="Edit User Profile"
+        android:title="User Profile"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_menu_user_profile" />
     <item
-        android:id="@+id/menu_services"
-        android:icon="@drawable/ic_menu_service"
-        android:title="Services"
+        android:id="@+id/menu_cart"
+        android:icon="@drawable/ic_menu_cart"
+        android:title="Cart"
         app:showAsAction="ifRoom" />
     <item
         android:id="@+id/menu_setting"
