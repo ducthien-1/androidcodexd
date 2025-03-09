@@ -7,8 +7,8 @@ import com.example.test1.dao.AccountDAO;
 import com.example.test1.entity.Account;
 
 public class SessionManager {
-    private static final String PREF_NAME = "NyAppPref";
-    private static final String KEY_ACCOUNT_ID = "accountID";
+    private static final String PREF_NAME = "MyPrefs";
+    private static final String KEY_ACCOUNT_ID = "accountId";
 
     private SharedPreferences sharedPreferences;
     private AccountDAO accountDAO;

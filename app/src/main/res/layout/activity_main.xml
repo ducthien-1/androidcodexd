@@ -48,15 +48,23 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center">
-
+            <ImageButton
+                android:id="@+id/profileButton"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:src="@drawable/logo"
+                android:background="?android:attr/actionBarItemBackground"
+                android:contentDescription="Profile"
+                android:scaleType="fitCenter"
+                android:layout_marginEnd="8dp" />
             <ImageButton
                 android:id="@+id/cartButton"
-                android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:src="@drawable/ic_cart"
-            android:background="?android:attr/actionBarItemBackground"
-            android:contentDescription="Cart"
-            android:scaleType="fitCenter" />
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?android:attr/actionBarItemBackground"
+                android:contentDescription="Cart"
+                android:scaleType="fitCenter"
+                android:src="@drawable/ic_cart" />
 
             <TextView
                 android:id="@+id/cartBadge"

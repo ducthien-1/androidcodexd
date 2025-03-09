@@ -1,10 +1,12 @@
 package com.example.test1;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,6 +22,7 @@ import java.util.List;
 import com.example.test1.adapter.ProductAdapter;
 import com.example.test1.dao.ProductDAO;
 import com.example.test1.entity.Product;
+import com.example.test1.manager.SessionManager;
 
 public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
@@ -29,7 +32,8 @@ public class MainActivity extends AppCompatActivity {
     private List<Product> fullProductList;
     private ProductDAO productDAO;
     private TextView cartBadge;
-    private ImageButton backBtn;
+    private ImageButton backBtn, profileButton;
+    private SessionManager sessionManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +66,13 @@ public class MainActivity extends AppCompatActivity {
             fullProductList = new ArrayList<>();
         }
         productList = new ArrayList<>(fullProductList);
-
+        sessionManager = new SessionManager(this );
+        if (sessionManager == null) {
+            Log.e(TAG, "Failed to initialize SessionManager");
+            Toast.makeText(this, "Error initializing session", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
         // Setup RecyclerView
         productAdapter = new ProductAdapter(productList);
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
@@ -101,7 +111,16 @@ public class MainActivity extends AppCompatActivity {
             });
         }
         updateCartCount();
-
+        profileButton = findViewById(R.id.profileButton);
+        if (profileButton != null) {
+            profileButton.setOnClickListener(v -> {
+                if (sessionManager != null && sessionManager.isLoggedIn()) {
+                    startActivity(new Intent(this, ProfileActivity.class));
+                } else {
+                    showLoggedInDialog();
+                }
+            });
+        }
 
     }
 
@@ -176,6 +195,18 @@ public class MainActivity extends AppCompatActivity {
             cartBadge.setText(String.valueOf(count));
             cartBadge.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
         }
+    }
+    public void  showLoggedInDialog() {
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.dialog_not_logged_in);
+        Button btnLogin = dialog.findViewById(R.id.btn_login_dialog);
+        btnLogin.setOnClickListener(v -> {
+            startActivity(new Intent(this, LoginActivity.class));
+            dialog.dismiss();
+        });
+        dialog.show();
+
+
     }
 
     @Override
