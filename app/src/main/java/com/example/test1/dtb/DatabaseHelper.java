@@ -1,4 +1,5 @@
-package com.example.test1.dtb;// DatabaseHelper.java
+package com.example.test1.dtb;
+
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -22,9 +23,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_ADDRESS = "address";
     private static final String COLUMN_ROLE_ID = "roleId";
 
-
-
-
+    private static final String TABLE_PRODUCTS = "Products";
 
     // Table creation SQL
     private static final String SQL_CREATE_ACCOUNTS =
@@ -52,7 +51,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     "unitPrice REAL, " +
                     "unitQuantity INTEGER, " +
                     "isFeatured BOOLEAN, " +
-                    "imageResId INTEGER, " + // Ensure this column exists
+                    "imageResId INTEGER, " +
                     "sales INTEGER, " +
                     "FOREIGN KEY (categoryId) REFERENCES Categories(categoryId))";
 
@@ -101,29 +100,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Get all accounts
     public Cursor getAllAccounts() {
-
-//        SQLiteDatabase db = this.getReadableDatabase();
-//        return db.rawQuery("SELECT * FROM " + TABLE_ACCOUNTS, null);
-        List<Account> accountsList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_ACCOUNTS, null);
+        return db.rawQuery("SELECT * FROM " + TABLE_ACCOUNTS, null);
+    }
 
-        if (cursor.moveToFirst()) {
-            do {
-                int id = cursor.getInt(0);
-                String username = cursor.getString(1);
-                String phone = cursor.getString(2);
-                String email = cursor.getString(3);
-                String address = cursor.getString(4);
-                int roleId = cursor.getInt(5);
-
-                accountsList.add(new Account(id, username, "", phone, email, address, roleId));
-            } while (cursor.moveToNext());
-        }
-
-        cursor.close();
-        db.close();
-        return (Cursor) accountsList;
+    // Get all products
+    public Cursor getAllProducts() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_PRODUCTS, null);
     }
 
     // Delete account
@@ -131,5 +115,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         return db.delete(TABLE_ACCOUNTS, COLUMN_ID + "=?",
                 new String[]{String.valueOf(accountId)}) > 0;
+    }
+
+    // Delete product
+    public boolean deleteProduct(int productId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.delete(TABLE_PRODUCTS, "productId=?",
+                new String[]{String.valueOf(productId)}) > 0;
     }
 }

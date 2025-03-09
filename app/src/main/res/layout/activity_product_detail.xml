@@ -34,26 +34,26 @@
             android:focusable="false" />
 
         <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_menu_sort_by_size"
-            android:background="?android:attr/actionBarItemBackground"
-            android:contentDescription="Filter" />
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:id="@+id/cartButton"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:src="@drawable/ic_cart"
             android:background="?android:attr/actionBarItemBackground"
             android:contentDescription="Cart"
-            android:id="@+id/cartButton"/>
+            android:scaleType="fitCenter" />
 
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:background="?android:attr/actionBarItemBackground"
-            android:contentDescription="Chat" />
+        <TextView
+            android:id="@+id/cartBadge"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:text="0"
+            android:textSize="15sp"
+            android:textColor="@android:color/white"
+            android:background="@android:color/holo_red_dark"
+            android:gravity="center"
+            android:layout_marginStart="-8dp"
+            android:layout_marginTop="-8dp" />
+    
     </LinearLayout>
 
     <!-- Product Image -->

@@ -10,7 +10,6 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import android.database.Cursor;
-import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -18,7 +17,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.test1.R;
 import com.example.test1.adapter.AccountAdapter;
-import com.example.test1.dao.AccountDAO;
 import com.example.test1.dtb.DatabaseHelper;
 import com.example.test1.entity.Account;
 
@@ -34,9 +32,6 @@ public class UserManagementActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-
-
-
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_user_management);
@@ -46,28 +41,50 @@ public class UserManagementActivity extends AppCompatActivity {
             return insets;
         });
 
+        // Khởi tạo accountList
+        accountList = new ArrayList<>();
+
         dbHelper = new DatabaseHelper(this);
         loadAccounts();
+
+        // Thiết lập RecyclerView
         RecyclerView recyclerViewAccountList = findViewById(R.id.recyclerViewAccountList);
         recyclerViewAccountList.setLayoutManager(new LinearLayoutManager(this));
-        AccountAdapter accountAdapterAdapter = new AccountAdapter(accountList, this);
-        recyclerViewAccountList.setAdapter(accountAdapterAdapter);
+        adapter = new AccountAdapter(accountList, this); // Khởi tạo adapter
+        recyclerViewAccountList.setAdapter(adapter);
+
         TextView tvDelete = findViewById(R.id.tvDelete);
+        // TODO: Thêm logic cho tvDelete nếu cần
     }
 
     private void loadAccounts() {
-        accountList.clear();
+        // Kiểm tra null và khởi tạo nếu cần
+        if (accountList == null) {
+            accountList = new ArrayList<>();
+        } else {
+            accountList.clear();
+        }
+
         Cursor cursor = dbHelper.getAllAccounts();
-        if (cursor.moveToFirst()) {
+        if (cursor != null && cursor.moveToFirst()) {
             do {
                 @SuppressLint("Range") int accountId = cursor.getInt(cursor.getColumnIndex("accountId"));
+                @SuppressLint("Range") String username = cursor.getString(cursor.getColumnIndex("username"));
+                @SuppressLint("Range") String password = cursor.getString(cursor.getColumnIndex("password"));
+                @SuppressLint("Range") String phoneNumber = cursor.getString(cursor.getColumnIndex("phoneNumber"));
                 @SuppressLint("Range") String email = cursor.getString(cursor.getColumnIndex("email"));
-                accountList.add(new Account());
+                @SuppressLint("Range") String address = cursor.getString(cursor.getColumnIndex("address"));
+                @SuppressLint("Range") int roleId = cursor.getInt(cursor.getColumnIndex("roleId"));
+
+                Account account = new Account(accountId, username, password, phoneNumber, email, address, roleId);
+                accountList.add(account);
             } while (cursor.moveToNext());
         }
-        cursor.close();
-        adapter.notifyDataSetChanged();
+        if (cursor != null) {
+            cursor.close();
+        }
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        }
     }
-
-
 }

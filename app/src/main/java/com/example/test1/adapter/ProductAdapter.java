@@ -26,7 +26,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
     @Override
     public ProductViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.activity_item_product, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_product, parent, false);
         Log.d(TAG, "Creating ViewHolder for viewType: " + viewType);
         return new ProductViewHolder(view);
     }
@@ -89,9 +89,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         public ProductViewHolder(View itemView) {
             super(itemView);
-            textProductName = itemView.findViewById(R.id.textProductName);
-            textPrice = itemView.findViewById(R.id.textPrice);
-            imageProduct = itemView.findViewById(R.id.imageProduct);
+            textProductName = itemView.findViewById(R.id.productName);
+            textPrice = itemView.findViewById(R.id.productPrice);
+            imageProduct = itemView.findViewById(R.id.productImage);
             Log.d("ProductViewHolder", "ViewHolder created for item");
             itemView.setClickable(true);
             itemView.setFocusable(true);

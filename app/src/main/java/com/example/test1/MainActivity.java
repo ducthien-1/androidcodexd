@@ -2,12 +2,15 @@ package com.example.test1;
 
 import android.content.Intent;
 import android.util.Log;
-import android.view.View;  // Add this import for View.VISIBLE and View.GONE
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
@@ -23,10 +26,9 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ProductAdapter productAdapter;
     private List<Product> productList;
-    private List<Product> fullProductList; // To store all products for filtering
+    private List<Product> fullProductList;
     private ProductDAO productDAO;
     private TextView cartBadge;
-
     private ImageButton backBtn;
 
     @Override
@@ -34,100 +36,124 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Log.d(TAG, "onCreate called");
-
-        recyclerView = findViewById(R.id.recyclerViewProducts);
-        if (recyclerView == null) {
-            Log.e(TAG, "RecyclerView not found in activity_main.xml");
-            Toast.makeText(this, "RecyclerView not found", Toast.LENGTH_SHORT).show();
-            return;
+        // Setup Toolbar
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        if (toolbar == null) {
+            Log.e(TAG, "Toolbar not found in layout");
+            Toast.makeText(this, "Toolbar not found", Toast.LENGTH_SHORT).show();
         } else {
-            Log.d(TAG, "RecyclerView initialized successfully");
+            setSupportActionBar(toolbar);
+            Log.d(TAG, "Toolbar set as ActionBar");
         }
 
+        // Initialize RecyclerView
+        recyclerView = findViewById(R.id.recyclerViewProducts);
+        if (recyclerView == null) {
+            Log.e(TAG, "RecyclerView not found");
+            Toast.makeText(this, "RecyclerView not found", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Initialize Product DAO and data
         productDAO = new ProductDAO(this);
         productDAO.insertSampleProducts(this);
-
         fullProductList = productDAO.getAllProducts();
         if (fullProductList == null) {
             fullProductList = new ArrayList<>();
         }
         productList = new ArrayList<>(fullProductList);
 
-        Log.d(TAG, "Full Product List Size: " + (fullProductList != null ? fullProductList.size() : "null"));
-        Log.d(TAG, "Product List Size: " + (productList != null ? productList.size() : "null"));
-
-        if (productList.isEmpty()) {
-            Log.w(TAG, "Product List is empty after inserting samples, adding manual data");
-            productList.add(new Product(1, 1, "Sample Product", "Description", 99.99, 100, true, R.drawable.product1, 50));
-            productList.add(new Product(2, 1, "Another Product", "Description", 149.99, 50, false, R.drawable.product2, 30));
-            fullProductList.addAll(productList);
-            Log.d(TAG, "Added manual sample data, Product List Size: " + productList.size());
-        }
-
+        // Setup RecyclerView
         productAdapter = new ProductAdapter(productList);
-        if (productAdapter == null) {
-            Log.e(TAG, "ProductAdapter is null");
-        } else {
-            Log.d(TAG, "ProductAdapter initialized with " + productList.size() + " items");
-        }
-
         recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-        Log.d(TAG, "GridLayoutManager set with 3 columns");
         recyclerView.setAdapter(productAdapter);
 
+        // Initialize SearchView
         SearchView searchView = findViewById(R.id.searchView);
         if (searchView != null) {
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String query) {
-                    Log.d(TAG, "Search query submitted: " + query);
                     filterProducts(query);
                     return true;
                 }
 
                 @Override
                 public boolean onQueryTextChange(String newText) {
-                    Log.d(TAG, "Search query changing: " + newText);
                     filterProducts(newText);
                     return true;
                 }
             });
-            Log.d(TAG, "SearchView initialized successfully");
-        } else {
-            Log.e(TAG, "SearchView not found in activity_main.xml");
         }
 
+        // Initialize Back Button
+        backBtn = findViewById(R.id.backBtn);
+        if (backBtn != null) {
+            backBtn.setOnClickListener(v -> goBackToCategories(v));
+        }
+
+//         Initialize Cart components
         cartBadge = findViewById(R.id.cartBadge);
-        if (cartBadge == null) {
-            Log.e(TAG, "Cart badge not found in activity_main.xml");
-        } else {
-            updateCartCount();
-        }
-
         ImageButton cartButton = findViewById(R.id.cartButton);
         if (cartButton != null) {
             cartButton.setOnClickListener(v -> {
-                Log.d(TAG, "Navigating to ShoppingCartActivity");
                 startActivity(new Intent(this, ShoppingCartActivity.class));
             });
-        } else {
-            Log.e(TAG, "Cart button not found in activity_main.xml");
         }
+        updateCartCount();
 
-        backBtn = findViewById(R.id.backBtn);
-        backBtn.setOnClickListener(v -> {
-            goBackToCategories(v); // Use the new method for back navigation
-        });
 
     }
 
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem menuItem) {
+        Log.d(TAG, "Menu item selected: " + menuItem.getTitle()); // Thêm log để kiểm tra
+        if (menuItem.getItemId() == R.id.menu_user_profile) {
+            showEditUserProfile();
+        } else if (menuItem.getItemId() == R.id.menu_services) {
+            showServices();
+        } else if (menuItem.getItemId() == R.id.menu_setting) {
+            Toast.makeText(this, "Setting menu selected", Toast.LENGTH_SHORT).show();
+        } else if (menuItem.getItemId() == R.id.menu_favourite) {
+            Toast.makeText(this, "Favourite menu selected", Toast.LENGTH_SHORT).show();
+        } else if (menuItem.getItemId() == R.id.menu_req_gps) {
+            requestGPS();
+        } else if (menuItem.getItemId() == R.id.menu_send_notification) {
+            sendNotification();
+        } else if (menuItem.getItemId() == R.id.menu_logout) {
+            Toast.makeText(this, "Logout menu selected", Toast.LENGTH_SHORT).show();
+        }
+        return super.onOptionsItemSelected(menuItem);
+    }
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        Log.d(TAG, "Menu inflated with " + menu.size() + " items");
+        return true;
+    }
+
+    // Các phương thức giả định
+    private void showEditUserProfile() {
+        Toast.makeText(this, "Edit User Profile selected", Toast.LENGTH_SHORT).show();
+    }
+
+    private void showServices() {
+        Toast.makeText(this, "Services selected", Toast.LENGTH_SHORT).show();
+    }
+
+    private void requestGPS() {
+        Toast.makeText(this, "Request GPS selected", Toast.LENGTH_SHORT).show();
+    }
+
+    private void sendNotification() {
+        Toast.makeText(this, "Send Notification selected", Toast.LENGTH_SHORT).show();
+    }
+
     private void filterProducts(String query) {
-        Log.d(TAG, "Filtering products with query: " + query);
         if (fullProductList == null || fullProductList.isEmpty()) {
-            Log.w(TAG, "Full product list is empty or null, cannot filter");
             productList.clear();
-            productList.addAll(new ArrayList<>());
             productAdapter.notifyDataSetChanged();
             return;
         }
@@ -139,11 +165,9 @@ public class MainActivity extends AppCompatActivity {
                 filteredList.add(product);
             }
         }
-
         productList.clear();
         productList.addAll(filteredList);
         productAdapter.notifyDataSetChanged();
-        Log.d(TAG, "Filtered product list size: " + filteredList.size());
     }
 
     public void updateCartCount() {
@@ -151,9 +175,6 @@ public class MainActivity extends AppCompatActivity {
         if (cartBadge != null) {
             cartBadge.setText(String.valueOf(count));
             cartBadge.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
-            Log.d(TAG, "Cart count updated to: " + count);
-        } else {
-            Log.w(TAG, "Cart badge is null, cannot update cart count");
         }
     }
 
@@ -161,14 +182,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         updateCartCount();
-        Log.d(TAG, "MainActivity resumed, cart count updated");
     }
+
     public void goBackToCategories(View view) {
-        Log.d(TAG, "Back button clicked, navigating back to CategoriesActivity");
-        Intent intent = new Intent(this, CategoriesActivity.class);
-        // Optionally pass the category ID if filtering is needed (e.g., from the product)
-        // For simplicity, we can navigate without filtering unless a specific category is tracked
-        startActivity(intent);
-        finish(); // Close MainActivity to prevent back stack issues
+        startActivity(new Intent(this, CategoriesActivity.class));
+        finish();
     }
 }
