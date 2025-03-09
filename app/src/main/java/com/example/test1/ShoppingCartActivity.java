@@ -29,7 +29,7 @@ public class ShoppingCartActivity extends AppCompatActivity {
         recyclerViewCart = findViewById(R.id.recyclerViewCart);
         emptyCartMessage = findViewById(R.id.emptyCartMessage);
         textTotalPayment = findViewById(R.id.textTotalPayment);
-        backBtn = findViewById(R.id.backBtn);
+        backBtn = findViewById(R.id.backButton);
         recyclerViewCart.setLayoutManager(new LinearLayoutManager(this));
 
         List<CartItem> cartItems = ShoppingCartManager.getInstance().getCartItems();

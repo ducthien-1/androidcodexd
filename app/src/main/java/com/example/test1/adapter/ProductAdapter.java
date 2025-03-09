@@ -38,15 +38,20 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
             if (product != null) {
                 holder.textProductName.setText(product.getProductName());
                 holder.textPrice.setText(String.format("$%.2f", product.getUnitPrice()));
-                try {
-                    holder.imageProduct.setImageResource(product.getImageResId());
-                    Log.d(TAG, "Image set for product: " + product.getProductName());
-                } catch (Exception e) {
-                    Log.e(TAG, "Failed to set image for product: " + product.getProductName(), e);
-                    holder.imageProduct.setImageResource(android.R.drawable.ic_menu_help); // Fallback image
+                if (holder.imageProduct != null) {
+                    int imageResId = product.getImageResId();
+                    Log.d(TAG, "Attempting to set image for product: " + product.getProductName() + ", ResId: " + imageResId);
+                    try {
+                        holder.imageProduct.setImageResource(imageResId);
+                        Log.d(TAG, "Image set successfully for product: " + product.getProductName());
+                    } catch (Exception e) {
+                        Log.e(TAG, "Failed to set image for product: " + product.getProductName() + ", ResId: " + imageResId, e);
+                        holder.imageProduct.setImageResource(android.R.drawable.ic_menu_help);
+                    }
+                } else {
+                    Log.e(TAG, "imageProduct is null for product: " + product.getProductName());
                 }
 
-                // Set click listener to navigate to ProductDetailActivity
                 holder.itemView.setOnClickListener(v -> {
                     Log.d(TAG, "Product clicked at position " + position + ", ID: " + product.getProductId());
                     if (product.getProductId() > 0) {
@@ -58,21 +63,9 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
                         } catch (Exception e) {
                             Log.e(TAG, "Failed to start ProductDetailActivity: " + e.getMessage(), e);
                         }
-                    } else {
-                        Log.e(TAG, "Invalid product ID: " + product.getProductId());
                     }
                 });
-            } else {
-                Log.e(TAG, "Product at position " + position + " is null, skipping rendering");
-                holder.textProductName.setText("No Product");
-                holder.textPrice.setText("N/A");
-                holder.imageProduct.setImageResource(android.R.drawable.ic_menu_help);
             }
-        } else {
-            Log.e(TAG, "Invalid position or null productList at position: " + position);
-            holder.textProductName.setText("Error");
-            holder.textPrice.setText("N/A");
-            holder.imageProduct.setImageResource(android.R.drawable.ic_menu_help);
         }
     }
 
@@ -89,12 +82,21 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ProductV
 
         public ProductViewHolder(View itemView) {
             super(itemView);
-            textProductName = itemView.findViewById(R.id.productName);
-            textPrice = itemView.findViewById(R.id.productPrice);
-            imageProduct = itemView.findViewById(R.id.productImage);
+            textProductName = itemView.findViewById(R.id.textProductName);
+            textPrice = itemView.findViewById(R.id.textPrice);
+            imageProduct = itemView.findViewById(R.id.productImage); // Fixed ID
+            if (imageProduct == null) {
+                Log.e("ProductViewHolder", "ImageView productImage not found");
+            }
             Log.d("ProductViewHolder", "ViewHolder created for item");
             itemView.setClickable(true);
             itemView.setFocusable(true);
         }
+    }
+
+    public void updateList(List<Product> newList) {
+        productList.clear();
+        productList.addAll(newList);
+        notifyDataSetChanged();
     }
 }

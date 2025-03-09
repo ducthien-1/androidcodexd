@@ -17,4 +17,8 @@
     <string name="add_to_cart">Add to cart</string>
     <string name="buy_now">Buy now</string>
     <string name="review_image">Review Image</string>
+    <string name="bottom_favorite">Recommend</string>
+    <string name="bottom_bag">Categories</string>
+    <string name="bottom_bell">Notifications</string>
+    <string name="bottom_profile">Profile</string>
 </resources>
