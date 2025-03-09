@@ -85,14 +85,16 @@ public class LoginActivity extends AppCompatActivity {
                         Account account = accountDAO.login(username, password);
                         if(account != null) {
                             Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
 
                             // Save the account id in SharedPreferences
                             SharedPreferences.Editor editor = sharedPreferences.edit();
                             editor.putInt(KEY_ACCOUNT_ID, account.getAccountId());
                             editor.apply();
+
+
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
+                            finish();
 
 
                         }
