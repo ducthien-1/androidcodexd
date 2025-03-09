@@ -60,6 +60,8 @@ public class AccountDAO {
         return db.insert(TABLE_NAME, null, values);
 
     }
+
+
     // Login Method
     public Account login(String username, String password) {
         String table = TABLE_NAME;

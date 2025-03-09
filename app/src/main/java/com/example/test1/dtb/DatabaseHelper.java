@@ -1,11 +1,30 @@
 package com.example.test1.dtb;// DatabaseHelper.java
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import com.example.test1.entity.Account;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "EcommerceDB";
     private static final int DATABASE_VERSION = 2;
+
+    private static final String TABLE_ACCOUNTS = "Accounts";
+    private static final String COLUMN_ID = "accountId";
+    private static final String COLUMN_USERNAME = "username";
+    private static final String COLUMN_PASSWORD = "password";
+    private static final String COLUMN_PHONE = "phoneNumber";
+    private static final String COLUMN_EMAIL = "email";
+    private static final String COLUMN_ADDRESS = "address";
+    private static final String COLUMN_ROLE_ID = "roleId";
+
+
+
+
 
     // Table creation SQL
     private static final String SQL_CREATE_ACCOUNTS =
@@ -78,5 +97,39 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS Categories");
         db.execSQL("DROP TABLE IF EXISTS Accounts");
         onCreate(db);
+    }
+
+    // Get all accounts
+    public Cursor getAllAccounts() {
+
+//        SQLiteDatabase db = this.getReadableDatabase();
+//        return db.rawQuery("SELECT * FROM " + TABLE_ACCOUNTS, null);
+        List<Account> accountsList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_ACCOUNTS, null);
+
+        if (cursor.moveToFirst()) {
+            do {
+                int id = cursor.getInt(0);
+                String username = cursor.getString(1);
+                String phone = cursor.getString(2);
+                String email = cursor.getString(3);
+                String address = cursor.getString(4);
+                int roleId = cursor.getInt(5);
+
+                accountsList.add(new Account(id, username, "", phone, email, address, roleId));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return (Cursor) accountsList;
+    }
+
+    // Delete account
+    public boolean deleteAccount(int accountId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.delete(TABLE_ACCOUNTS, COLUMN_ID + "=?",
+                new String[]{String.valueOf(accountId)}) > 0;
     }
 }

@@ -22,10 +22,6 @@
         android:title="Management"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_menu_setting" />
-    <item
-        android:id="@+id/menu_favourite"
-        android:title="Favourite"
-        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/menu_req_gps"
