@@ -1,5 +1,6 @@
 package com.example.test1;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -27,7 +28,7 @@ public class CategoriesActivity extends AppCompatActivity {
     private CategoryDAO categoryDAO;
     private ImageButton categoriesCartIcon;
     private TextView categoriesCartBadge;
-//    private Cart cart;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +49,7 @@ public class CategoriesActivity extends AppCompatActivity {
         // Initialize cart icon, badge, and cart
         categoriesCartIcon = findViewById(R.id.categoriesCartIcon);
         categoriesCartBadge = findViewById(R.id.categoriesCartBadge);
-//        cart = Cart.getInstance(this);
+
 
         categoryDAO = new CategoryDAO(this);
         // Insert sample categories for testing
@@ -104,20 +105,16 @@ public class CategoriesActivity extends AppCompatActivity {
             Log.e(TAG, "SearchView not found in activity_categories.xml");
         }
 
-        // Update cart badge initially
-//        updateCartBadge();
-
-        // Register broadcast receiver for cart updates
-//        registerReceiver(cartUpdateReceiver, new IntentFilter("CART_COUNT_UPDATE"));
+        categoriesCartBadge = findViewById(R.id.categoriesCartBadge);
+        categoriesCartIcon = findViewById(R.id.categoriesCartIcon);
+        if (categoriesCartIcon != null) {
+            categoriesCartIcon.setOnClickListener(v -> {
+                startActivity(new Intent(this, ShoppingCartActivity.class));
+            });
+        }
+        updateCartCount();
     }
-//
-//    @Override
-//    protected void onDestroy() {
-//        super.onDestroy();
-//        if (cartUpdateReceiver != null) {
-//            unregisterReceiver(cartUpdateReceiver); // Prevent memory leaks
-//        }
-//    }
+
 
     public void goBack(View view) {
         Log.d(TAG, "Back button clicked, navigating back");
@@ -146,36 +143,11 @@ public class CategoriesActivity extends AppCompatActivity {
         categoryAdapter.notifyDataSetChanged();
         Log.d(TAG, "Filtered category list size: " + filteredList.size());
     }
-
-//    private void updateCartBadge() {
-//        int count = cart.getCartCount();
-//        Log.d(TAG, "Updating cart badge, count: " + count);
-//
-//        if (categoriesCartBadge != null) {
-//            if (count > 0) {
-//                categoriesCartBadge.setText(String.valueOf(count));
-//                categoriesCartBadge.setVisibility(View.VISIBLE);
-//            } else {
-//                categoriesCartBadge.setVisibility(View.GONE);
-//            }
-//        }
-
-//        if (categoriesCartIcon != null) {
-//            categoriesCartIcon.setOnClickListener(v -> {
-//                Log.d(TAG, "Cart icon clicked, cart count: " + count);
-//                // Optionally navigate to a CartActivity
-//                // Intent intent = new Intent(this, CartActivity.class);
-//                // startActivity(intent);
-//            });
-//        }
-//    }
-
-//    private BroadcastReceiver cartUpdateReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            if (intent.getAction().equals("CART_COUNT_UPDATE")) {
-//                updateCartBadge();
-//            }
-//        }
-//    };
+    public void updateCartCount() {
+        int count = ShoppingCartManager.getInstance().getCartItemCount();
+        if (categoriesCartBadge != null) {
+            categoriesCartBadge.setText(String.valueOf(count));
+            categoriesCartBadge.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+        }
+    }
 }
