@@ -13,6 +13,15 @@
         android:theme="@style/Theme.Test1"
         tools:targetApi="31">
         <activity
+            android:name=".manager.UserManagementActivity"
+            android:exported="true" />
+        <activity
+            android:name=".manager.ProductManagementActivity"
+            android:exported="true" />
+        <activity
+            android:name=".manager.SelectManagementActivity"
+            android:exported="true" />
+        <activity
             android:name=".RegisterActivity"
             android:exported="false" />
         <activity
