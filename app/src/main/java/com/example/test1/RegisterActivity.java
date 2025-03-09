@@ -17,6 +17,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.example.test1.dao.AccountDAO;
+import com.example.test1.validation.Validation;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -27,6 +28,7 @@ public class RegisterActivity extends AppCompatActivity {
     private AccountDAO accountDAO;
     private boolean isPasswordVisible = false;
     private boolean isRepeatPasswordVisible = false;
+    private Validation validation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +50,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         // Initialize DAO
         accountDAO = new AccountDAO(this);
+        validation = new Validation();
 
         // Password visibility toggle
         ivPasswordVisibility.setOnClickListener(v -> {
@@ -91,6 +94,11 @@ public class RegisterActivity extends AppCompatActivity {
                 etUsername.requestFocus();
                 return;
             }
+            if(username.equals(accountDAO.getAccountByUsername(username))) {
+                etUsername.setError("Username already exists");
+                etUsername.requestFocus();
+                return;
+            }
             if (password.isEmpty()) {
                 etPassword.setError("Password is required");
                 etPassword.requestFocus();
@@ -116,6 +124,12 @@ public class RegisterActivity extends AppCompatActivity {
                 etEmail.requestFocus();
                 return;
             }
+            if(validation.isValidEmail(email) == false){
+                etEmail.setError("Email is not valid");
+                etEmail.requestFocus();
+                return;
+            }
+
             if (address.isEmpty()) {
                 etAddress.setError("Address is required");
                 etAddress.requestFocus();

@@ -27,6 +27,27 @@ public class AccountDAO {
         db = dbHelper.getWritableDatabase();
 
     }
+    // Get Account By Username
+    public Account getAccountByUsername(String username) {
+        String table = TABLE_NAME;
+        String[] columns = {COLUMN_ACCOUNT_ID, COLUMN_USERNAME, COLUMN_PASSWORD, COLUMN_PHONENUMBER, COLUMN_EMAIL, COLUMN_ADDRESS, COLUMN_ROLE_ID};
+        String selection = COLUMN_USERNAME + " = ?";
+        String[] selectionArgs = {username};
+        Cursor cursor = db.query(table, columns, selection, selectionArgs, null, null, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            Account account = cursorToAccount(cursor);
+            cursor.close();
+            return account;
+        }
+        if (cursor != null) {
+            cursor.close();
+        }
+        return null;
+
+    }
+
+
+
     // Get Account By ID
     public Account getAccountById(int accountId) {
         String table = TABLE_NAME;
