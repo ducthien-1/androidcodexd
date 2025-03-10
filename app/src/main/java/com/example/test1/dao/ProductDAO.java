@@ -14,21 +14,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
-
 public class ProductDAO {
     private static final String TAG = "ProductDAO";
     private DatabaseHelper dbHelper;
+    private static final String TABLE_PRODUCTS = "Products";
 
     public ProductDAO(Context context) {
         dbHelper = new DatabaseHelper(context);
         Log.d(TAG, "ProductDAO initialized");
     }
 
-    // ProductDAO.java
-    public void addProduct(Product product) {
+    // Thêm sản phẩm mới
+    public long addProduct(Product product) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         Log.d(TAG, "Adding product: " + product.getProductName());
+
         ContentValues values = new ContentValues();
         values.put("categoryId", product.getCategoryId());
         values.put("productName", product.getProductName());
@@ -37,48 +37,62 @@ public class ProductDAO {
         values.put("unitQuantity", product.getUnitQuantity());
         values.put("isFeatured", product.isFeatured() ? 1 : 0);
         values.put("imageResId", product.getImageResId());
-        values.put("sales", product.getSales()); // Add sales
-        long result = db.insert("Products", null, values);
-        if (result != -1) {
-            Log.d(TAG, "Product added successfully with ID: " + result);
+        values.put("sales", product.getSales());
+
+        // Thêm sản phẩm và trả về ID được tạo tự động
+        long newId = db.insert(TABLE_PRODUCTS, null, values);
+        if (newId != -1) {
+            Log.d(TAG, "Product added successfully with ID: " + newId);
+            product.setProductId((int) newId); // Cập nhật ID cho đối tượng Product
         } else {
             Log.e(TAG, "Failed to add product: " + product.getProductName());
         }
         db.close();
+        return newId; // Trả về ID mới hoặc -1 nếu thất bại
     }
 
+    // Lấy sản phẩm theo ID
     public Product getProduct(int productId) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Log.d(TAG, "Querying product with ID: " + productId);
-        Cursor cursor = db.rawQuery("SELECT * FROM Products WHERE productId = ?", new String[]{String.valueOf(productId)});
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_PRODUCTS + " WHERE productId = ?",
+                new String[]{String.valueOf(productId)});
         Product product = null;
-        if (cursor.moveToFirst()) {
-            product = new Product(
-                    cursor.getInt(cursor.getColumnIndexOrThrow("productId")),
-                    cursor.getInt(cursor.getColumnIndexOrThrow("categoryId")),
-                    cursor.getString(cursor.getColumnIndexOrThrow("productName")),
-                    cursor.getString(cursor.getColumnIndexOrThrow("productDescription")),
-                    cursor.getDouble(cursor.getColumnIndexOrThrow("unitPrice")),
-                    cursor.getInt(cursor.getColumnIndexOrThrow("unitQuantity")),
-                    cursor.getInt(cursor.getColumnIndexOrThrow("isFeatured")) == 1,
-                    cursor.getInt(cursor.getColumnIndexOrThrow("imageResId")), // Use imageResId
-                    cursor.getInt(cursor.getColumnIndexOrThrow("sales"))
-            );
-            Log.d(TAG, "Found product: " + product.getProductName());
+
+        if (cursor != null && cursor.moveToFirst()) {
+            try {
+                product = new Product(
+                        cursor.getInt(cursor.getColumnIndexOrThrow("productId")),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("categoryId")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("productName")),
+                        cursor.getString(cursor.getColumnIndexOrThrow("productDescription")),
+                        cursor.getDouble(cursor.getColumnIndexOrThrow("unitPrice")),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("unitQuantity")),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("isFeatured")) == 1,
+                        cursor.getInt(cursor.getColumnIndexOrThrow("imageResId")),
+                        cursor.getInt(cursor.getColumnIndexOrThrow("sales"))
+                );
+                Log.d(TAG, "Found product: " + product.getProductName());
+            } catch (IllegalArgumentException e) {
+                Log.e(TAG, "Column not found in cursor: " + e.getMessage(), e);
+            }
+            cursor.close();
         } else {
             Log.w(TAG, "No product found with ID: " + productId);
         }
-        cursor.close();
         db.close();
         return product;
     }
 
+    // Lấy tất cả sản phẩm
     public List<Product> getAllProducts() {
         List<Product> productList = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         Log.d(TAG, "Querying all products");
-        Cursor cursor = db.rawQuery("SELECT * FROM Products", null);
-        if (cursor.moveToFirst()) {
+
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_PRODUCTS, null);
+        if (cursor != null && cursor.moveToFirst()) {
             do {
                 try {
                     int productId = cursor.getInt(cursor.getColumnIndexOrThrow("productId"));
@@ -88,33 +102,35 @@ public class ProductDAO {
                     double unitPrice = cursor.getDouble(cursor.getColumnIndexOrThrow("unitPrice"));
                     int unitQuantity = cursor.getInt(cursor.getColumnIndexOrThrow("unitQuantity"));
                     boolean isFeatured = cursor.getInt(cursor.getColumnIndexOrThrow("isFeatured")) == 1;
-                    int imageResId = cursor.getInt(cursor.getColumnIndexOrThrow("imageResId")); // Use imageResId
+                    int imageResId = cursor.getInt(cursor.getColumnIndexOrThrow("imageResId"));
                     int sales = cursor.getInt(cursor.getColumnIndexOrThrow("sales"));
 
-                    Log.d(TAG, "Raw data - productId: " + productId + ", productName: " + (productName != null ? productName : "null") + ", imageResId: " + imageResId + ", sales: " + sales);
-
+                    // Xử lý giá trị null
                     if (productName == null) productName = "Unnamed Product";
                     if (productDescription == null) productDescription = "No description";
 
-                    Product product = new Product(productId, categoryId, productName, productDescription, unitPrice, unitQuantity, isFeatured, imageResId, sales);
+                    Product product = new Product(productId, categoryId, productName, productDescription,
+                            unitPrice, unitQuantity, isFeatured, imageResId, sales);
                     productList.add(product);
                     Log.d(TAG, "Retrieved product: " + product.getProductName());
-                } catch (Exception e) {
+                } catch (IllegalArgumentException e) {
                     Log.e(TAG, "Failed to create Product from cursor: " + e.getMessage(), e);
                 }
             } while (cursor.moveToNext());
+            cursor.close();
         } else {
             Log.w(TAG, "No products found in database");
         }
-        cursor.close();
         db.close();
         Log.d(TAG, "Total products retrieved: " + productList.size());
         return productList;
     }
 
-    public void updateProduct(Product product) {
+    // Cập nhật sản phẩm
+    public boolean updateProduct(Product product) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        Log.d(TAG, "Updating product: " + product.getProductName());
+        Log.d(TAG, "Updating product with ID: " + product.getProductId());
+
         ContentValues values = new ContentValues();
         values.put("categoryId", product.getCategoryId());
         values.put("productName", product.getProductName());
@@ -123,34 +139,45 @@ public class ProductDAO {
         values.put("unitQuantity", product.getUnitQuantity());
         values.put("isFeatured", product.isFeatured() ? 1 : 0);
         values.put("imageResId", product.getImageResId());
-        values.put("sales", product.getSales()); // Add sales
-        int rowsAffected = db.update("Products", values, "productId = ?", new String[]{String.valueOf(product.getProductId())});
+        values.put("sales", product.getSales());
+
+        int rowsAffected = db.update(TABLE_PRODUCTS, values, "productId = ?",
+                new String[]{String.valueOf(product.getProductId())});
+        db.close();
+
         if (rowsAffected > 0) {
             Log.d(TAG, "Product updated successfully");
+            return true;
         } else {
             Log.e(TAG, "Failed to update product with ID: " + product.getProductId());
+            return false;
         }
-        db.close();
     }
 
-    public void deleteProduct(int productId) {
+    // Xóa sản phẩm
+    public boolean deleteProduct(int productId) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
         Log.d(TAG, "Deleting product with ID: " + productId);
-        int rowsAffected = db.delete("Products", "productId = ?", new String[]{String.valueOf(productId)});
+
+        int rowsAffected = db.delete(TABLE_PRODUCTS, "productId = ?",
+                new String[]{String.valueOf(productId)});
+        db.close();
+
         if (rowsAffected > 0) {
             Log.d(TAG, "Product deleted successfully");
+            return true;
         } else {
             Log.w(TAG, "No product found to delete with ID: " + productId);
+            return false;
         }
-        db.close();
     }
 
+    // Chèn dữ liệu mẫu
     public void insertSampleProducts(Context context) {
         Log.d(TAG, "Inserting sample products");
         SQLiteDatabase db = dbHelper.getWritableDatabase();
-        db.delete("Products", null, null); // Xóa dữ liệu cũ
+        db.delete(TABLE_PRODUCTS, null, null); // Xóa dữ liệu cũ
 
-        // Danh sách sản phẩm mẫu
         List<Product> products = Arrays.asList(
                 new Product(1, 1, "Sample Product", "Description", 99.99, 100, true, R.drawable.product1, 50),
                 new Product(2, 1, "Another Product", "Description", 149.99, 50, false, R.drawable.product2, 30),
@@ -174,12 +201,10 @@ public class ProductDAO {
             values.put("isFeatured", product.isFeatured() ? 1 : 0);
             values.put("imageResId", product.getImageResId());
             values.put("sales", product.getSales());
-            db.insertWithOnConflict("Products", null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            db.insertWithOnConflict(TABLE_PRODUCTS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
         }
 
         Log.d(TAG, "Sample products inserted successfully");
         db.close();
     }
 }
-
-

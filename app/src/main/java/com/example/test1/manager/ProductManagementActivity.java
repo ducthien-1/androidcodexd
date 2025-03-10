@@ -1,7 +1,9 @@
 package com.example.test1.manager;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -10,14 +12,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import android.database.Cursor;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.test1.R;
 import com.example.test1.adapter.ProductManagementAdapter;
-import com.example.test1.dtb.DatabaseHelper;
+import com.example.test1.dao.ProductDAO;
 import com.example.test1.entity.Product;
 
 import java.util.ArrayList;
@@ -28,7 +29,10 @@ public class ProductManagementActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private ProductManagementAdapter adapter;
     private List<Product> productList;
-    private DatabaseHelper dbHelper;
+    private ProductDAO productDAO;
+
+    private static final int REQUEST_CODE_ADD = 1;
+    private static final int REQUEST_CODE_UPDATE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,24 +45,34 @@ public class ProductManagementActivity extends AppCompatActivity {
             return insets;
         });
 
-        // Khởi tạo productList
+        // Khởi tạo productList và ProductDAO
         productList = new ArrayList<>();
+        productDAO = new ProductDAO(this);
 
-        dbHelper = new DatabaseHelper(this);
+        // Tải danh sách sản phẩm
         loadProducts();
 
         // Thiết lập RecyclerView
-        RecyclerView recyclerViewProductList = findViewById(R.id.recyclerViewProductList);
-        recyclerViewProductList.setLayoutManager(new LinearLayoutManager(this));
-        adapter = new ProductManagementAdapter(productList, this); // Sử dụng ProductManagementAdapter
-        recyclerViewProductList.setAdapter(adapter);
+        recyclerView = findViewById(R.id.recyclerViewProductList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new ProductManagementAdapter(productList, this);
+        recyclerView.setAdapter(adapter);
 
+        // Nút "Add Product"
+        Button btnAddProduct = findViewById(R.id.btnAddProduct);
+        btnAddProduct.setOnClickListener(v -> {
+            Intent intent = new Intent(ProductManagementActivity.this, AddProductActivity.class);
+            startActivityForResult(intent, REQUEST_CODE_ADD);
+        });
+
+        // Nút "Delete Selected Products"
         TextView tvDelete = findViewById(R.id.tvDelete);
         tvDelete.setOnClickListener(v -> {
             if (adapter.getSelectedProductIds().isEmpty()) {
                 Toast.makeText(this, "Please select at least one product to delete", Toast.LENGTH_SHORT).show();
             } else {
                 adapter.deleteSelectedProducts();
+                loadProducts(); // Làm mới danh sách sau khi xóa
                 Toast.makeText(this, "Selected products deleted", Toast.LENGTH_SHORT).show();
             }
         });
@@ -72,28 +86,19 @@ public class ProductManagementActivity extends AppCompatActivity {
             productList.clear();
         }
 
-        Cursor cursor = dbHelper.getAllProducts();
-        if (cursor != null && cursor.moveToFirst()) {
-            do {
-                @SuppressLint("Range") int productId = cursor.getInt(cursor.getColumnIndex("productId"));
-                @SuppressLint("Range") int categoryId = cursor.getInt(cursor.getColumnIndex("categoryId"));
-                @SuppressLint("Range") String productName = cursor.getString(cursor.getColumnIndex("productName"));
-                @SuppressLint("Range") String productDescription = cursor.getString(cursor.getColumnIndex("productDescription"));
-                @SuppressLint("Range") double unitPrice = cursor.getDouble(cursor.getColumnIndex("unitPrice"));
-                @SuppressLint("Range") int unitQuantity = cursor.getInt(cursor.getColumnIndex("unitQuantity"));
-                @SuppressLint("Range") boolean isFeatured = cursor.getInt(cursor.getColumnIndex("isFeatured")) == 1;
-                @SuppressLint("Range") int imageResId = cursor.getInt(cursor.getColumnIndex("imageResId"));
-                @SuppressLint("Range") int sales = cursor.getInt(cursor.getColumnIndex("sales"));
+        // Sử dụng ProductDAO để tải danh sách sản phẩm
+        productList.addAll(productDAO.getAllProducts());
 
-                Product product = new Product(productId, categoryId, productName, productDescription, unitPrice, unitQuantity, isFeatured, imageResId, sales);
-                productList.add(product);
-            } while (cursor.moveToNext());
-        }
-        if (cursor != null) {
-            cursor.close();
-        }
         if (adapter != null) {
             adapter.notifyDataSetChanged();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if ((requestCode == REQUEST_CODE_ADD || requestCode == REQUEST_CODE_UPDATE) && resultCode == RESULT_OK) {
+            loadProducts(); // Làm mới danh sách sau khi thêm hoặc cập nhật
         }
     }
 }
